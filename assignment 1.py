@@ -55,9 +55,9 @@ def handle_user_login(user):
 
 # Example user data
 user_data = {
-    "name": "JohnDoe",
-    "email": "johndoe@example.com",
-    "phone": "123-456-7890"
+    "name": "kafuidarkey",
+    "email": "kafuid@example.com",
+    "phone": "0503736391"
 }
 
 # Run the function
