@@ -1,64 +1,65 @@
 import os
-import json
+import getpass
 
-def handle_user_login(user):
-    # Set the home directory as the base directory
-    home_dir = os.path.expanduser("~")
-    
-    # Define the path to the user's directory within the home directory
-    user_dir = os.path.join(home_dir, user['name'])
+def main():
+    # Get the current user's username and home directory
+    username = getpass.getuser()
+    home_dir = os.path.expanduser(f"~/{username}")
+    profile_file_path = os.path.join(home_dir, 'profile.txt')
 
-    # Check if the current working directory is the user's directory
-    if os.getcwd() != user_dir:
-        print(f"Current working directory is not {user_dir}. Navigating to user's directory...")
+    # Check if the current directory matches the user's home directory
+    current_dir = os.getcwd()
+    if current_dir != home_dir:
+        # Create the user's directory if it doesn't match
+        os.makedirs(home_dir, exist_ok=True)
 
-        # If the user directory doesn't exist in the home directory, create it
-        if not os.path.exists(user_dir):
-            os.makedirs(user_dir)
-            print(f"Directory created for user: {user['name']}")
+    # Check if the profile file exists
+    if os.path.exists(profile_file_path):
+        # Open and read the existing profile
+        with open(profile_file_path, 'r') as file:
+            content = file.readlines()
+        
+        # Display the existing information to the user
+        profile_info = {
+            'Name': content[0].strip(),
+            'Phone': content[1].strip(),
+            'Email': content[2].strip()
+        }
+        
+        print("Current Profile Information:")
+        for key, value in profile_info.items():
+            print(f"{key}: {value}")
+        
+        # Ask the user if the information is up-to-date
+        update = input("Is this information up-to-date? (yes/no): ").strip().lower()
+        
+        if update != 'yes':
+            # Prompt the user for updated information if not up-to-date
+            profile_info = {
+                'Name': input("Enter your name: ").strip(),
+                'Phone': input("Enter your phone number: ").strip(),
+                'Email': input("Enter your email: ").strip()
+            }
+            # Write the updated information to the profile file
+            with open(profile_file_path, 'w') as file:
+                for value in profile_info.values():
+                    file.write(value + '\n')
+            print("Profile updated successfully.")
         else:
-            print(f"Directory already exists for user: {user['name']}")
-
-        # Change the current working directory to the user's directory
-        os.chdir(user_dir)
-        print(f"Moved to user's directory: {os.getcwd()}")
-    
-    # Define the path to the profile.txt file in the user's directory
-    profile_path = os.path.join(user_dir, 'profile.txt')
-
-    # Check if profile.txt exists and read its details
-    if os.path.exists(profile_path):
-        # Load the existing profile data
-        with open(profile_path, 'r') as profile_file:
-            stored_data = json.load(profile_file)
-
-        # Check if stored details match the current user details
-        if (stored_data.get("email") != user["email"] or 
-                stored_data.get("phone") != user["phone"]):
-            print("Profile details are outdated. Please confirm or update the details.")
-            # Ask user to confirm/update details
-            user_confirm = input("Do you want to update your profile? (yes/no): ").strip().lower()
-            if user_confirm == 'yes':
-                # Update the profile.txt with new data
-                with open(profile_path, 'w') as profile_file:
-                    json.dump(user, profile_file)
-                print("Profile updated successfully.")
-            else:
-                print("Profile not updated.")
-        else:
-            print("Profile details are up-to-date.")
+            print("Profile is up-to-date.")
     else:
-        # If profile.txt doesn't exist, create it with the current user data
-        with open(profile_path, 'w') as profile_file:
-            json.dump(user, profile_file)
-        print(f"Profile created for user: {user['name']}")
+        # If profile file doesn't exist, prompt user for new profile information
+        print("Profile file not found. Creating a new profile.")
+        profile_info = {
+            'Name': input("Enter your name: ").strip(),
+            'Phone': input("Enter your phone number: ").strip(),
+            'Email': input("Enter your email: ").strip()
+        }
+        # Write the new information to the profile file
+        with open(profile_file_path, 'w') as file:
+            for value in profile_info.values():
+                file.write(value + '\n')
+        print("Profile created successfully.")
 
-# Example user data
-user_data = {
-    "name": "kafuidarkey",
-    "email": "kafuid@example.com",
-    "phone": "0503736391"
-}
-
-# Run the function
-handle_user_login(user_data)
+if __name__ == "__main__":
+    main()
